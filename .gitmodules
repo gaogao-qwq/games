@@ -1,0 +1,9 @@
+[submodule "sim-raylib"]
+	path = sim/raylib
+	url = https://github.com/raysan5/raylib.git
+	branch = 5.0
+
+[submodule "topdown-raylib"]
+	path = topdown/raylib
+	url = https://github.com/raysan5/raylib.git
+	branch = 5.0
