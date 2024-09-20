@@ -14,7 +14,7 @@ static DebugInfo debugInfo = {
 	.showFrameTime = true,
 	.showFPS = true,
 	.showBrushInfo = true,
-	.showCanvasPrefabInfo = true
+	.showCanvasPrefabInfo = false
 #else
 	.showBrushSize = false,
 	.showBrushCursorPosition = false,
