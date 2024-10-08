@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "op_queue.h"
 #include "raylib.h"
 #include "util.h"
 
@@ -14,14 +15,16 @@ static DebugInfo debugInfo = {
 	.showFrameTime = true,
 	.showFPS = true,
 	.showBrushInfo = true,
-	.showCanvasPrefabInfo = false
+	.showCanvasPrefabInfo = false,
+	.showOpQueueInfo = true
 #else
 	.showBrushSize = false,
 	.showBrushCursorPosition = false,
 	.showFrameTime = false,
 	.showFPS = false,
 	.showBrushInfo = false,
-	.showCanvasPrefabInfo = false
+	.showCanvasPrefabInfo = false,
+	.showOpQueueInfo = false
 #endif
 };
 
@@ -32,11 +35,13 @@ static const float updateFrameTime = 1.0 / (float)TARGET_TICKRATE;
 static float accumulatedFrameTime = 0.0;
 static BrushCursor brushCursor = {{0}, SAND_COLOR, 4, 0, NULL, PARTICLE_SAND};
 static Canvas canvas;
+static OpQueue *opQueue;
 static CanvasPrefab canvasPrefab;
 
 int main(void) {
 	InitWindow(screenWidth, screenHeight, "Sim");
 	InitCanvas(CANVAS_SIZE, CANVAS_SIZE);
+	opQueue = MakeEmptyOpQueue();
 	SetExitKey(KEY_ESCAPE);
 	SetConfigFlags(FLAG_VSYNC_HINT);
 
@@ -56,7 +61,8 @@ int main(void) {
 void MainLoop() {
 	// Update
 	UpdateBrushCursor(&brushCursor);
-	UpdateBrushOperation(&brushCursor);
+	HandleBrushOperation();
+	HandleOperation();
 
 	accumulatedFrameTime += GetFrameTime();
 	while (accumulatedFrameTime >= updateFrameTime) {
@@ -77,6 +83,12 @@ void MainLoop() {
 void UpdateGameTick() {
 	UpdateParticles(&canvas);
 	UpdateCanvasPrefab(&canvas);
+}
+
+void SwitchBrushType(BrushCursor *cursor, ParticleType type) {
+	printf("%d\n", type);
+	cursor->type = type;
+	cursor->color = GetParticleByType(type).color;
 }
 
 Particle GetParticleByType(ParticleType type) {
@@ -101,6 +113,17 @@ Particle GetParticleByType(ParticleType type) {
 void SwapParticle(Particle *a, Particle *b) {
 	Particle tmp = *a;
 	*a = *b, *b = tmp;
+}
+
+void HandleOperation() {
+	if (!opQueue->len) return;
+
+	QueueNode *node = opQueue->front;
+	switch (node->op.type) {
+		case OP_BRUSH_DRAW:
+			BrushDraw(brushCursor, &canvas);
+	}
+	OpQueuePop(opQueue);
 }
 
 void UpdateBrushCursor(BrushCursor *cursor) {
@@ -172,25 +195,29 @@ void UpdateBrushCursor(BrushCursor *cursor) {
 	cursor->points = brush_points;
 }
 
-void UpdateBrushOperation(BrushCursor *cursor) {
-	if (IsKeyPressed(KEY_ONE)) {
-		cursor->type = PARTICLE_AIR;
-		cursor->color = AIR_COLOR;
-	} else if (IsKeyPressed(KEY_TWO)) {
-		cursor->type = PARTICLE_SAND;
-		cursor->color = SAND_COLOR;
-	} else if (IsKeyPressed(KEY_THREE)) {
-		cursor->type = PARTICLE_WATER;
-		cursor->color = WATER_COLOR;
-	} else if (IsKeyPressed(KEY_FOUR)) {
-		cursor->type = PARTICLE_STONE;
-		cursor->color = STONE_COLOR;
-	} else if (IsKeyPressed(KEY_FIVE)) {
-		cursor->type = PARTICLE_WOOD;
-		cursor->color = WOOD_COLOR;
+void HandleBrushOperation() {
+	switch (GetKeyPressed()) {
+		case KEY_ONE:
+			SwitchBrushType(&brushCursor, PARTICLE_AIR);
+			break;
+		case KEY_TWO:
+			SwitchBrushType(&brushCursor, PARTICLE_SAND);
+			break;
+		case KEY_THREE:
+			SwitchBrushType(&brushCursor, PARTICLE_WATER);
+			break;
+		case KEY_FOUR:
+			SwitchBrushType(&brushCursor, PARTICLE_STONE);
+			break;
+		case KEY_FIVE:
+			SwitchBrushType(&brushCursor, PARTICLE_WOOD);
+			break;
+		default:
+			break;
 	}
+
 	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-		BrushDraw(*cursor, &canvas);
+		OpQueuePush(opQueue, (Operation){.type = OP_BRUSH_DRAW, .data = NULL});
 	}
 }
 
@@ -482,11 +509,17 @@ void DrawDebugInfo(BrushCursor cursor) {
 		DrawText(brushInfoText, 50, 90, 10, RAYWHITE);
 	}
 
+	if (debugInfo.showOpQueueInfo) {
+		char OpQueueInfoText[64];
+		sprintf(OpQueueInfoText, "OpQueue len: %lu", opQueue->len);
+		DrawText(OpQueueInfoText, 50, 100, 10, RAYWHITE);
+	}
+
 	if (debugInfo.showCanvasPrefabInfo) {
 		char canvasPrefabInfoText[64];
 		sprintf(canvasPrefabInfoText, "Canvas prefab recs count: %lu",
 				canvasPrefab.len);
-		DrawText(canvasPrefabInfoText, 50, 100, 10, RAYWHITE);
+		DrawText(canvasPrefabInfoText, 50, 110, 10, RAYWHITE);
 		for (size_t i = 0; i < canvasPrefab.len; ++i) {
 			DrawRectangleLinesEx(canvasPrefab.recs[i], 0.5, RED);
 		}

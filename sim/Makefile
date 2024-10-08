@@ -63,21 +63,21 @@ linux_build:
 	$(CC) -o build/sim.o \
 		-I include -L lib -lm \
 		-Wall -Wextra -std=c11 $(DEBUG_FLAG) $(EXTRA_FLAG) \
-		src/sim.c src/util.c lib/libraylib.a
+		src/sim.c src/util.c src/op_queue.c lib/libraylib.a
 
 macos_build:
 	$(CC) -o build/sim.o \
 		-framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL \
-		-I include -L lib -lm \
+		-I include -lm \
 		-Wall -Wextra -std=c11 $(DEBUG_FLAG) $(EXTRA_FLAG) \
-		src/sim.c src/util.c lib/libraylib.a
+		src/sim.c src/util.c src/op_queue.c lib/libraylib.a
 
 web_build:
 	$(CC) -o build/index.html \
-		-I include -L lib -lm \
+		-I include -lm \
 		-Wall -Wextra -std=c11 $(DEBUG_FLAG) $(EXTRA_FLAG) \
 		-DPLATFORM_WEB -s USE_GLFW=3 --shell-file src/minshell.html \
-		src/sim.c src/util.c lib/libraylibweb.a
+		src/sim.c src/util.c src/op_queue.c lib/libraylibweb.a
 
 clean:
 	rm build/*

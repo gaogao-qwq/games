@@ -21,12 +21,19 @@
 #define WATER_COLOR  (Color){0, 121, 241, 255}       // Blue
 #define STONE_COLOR  (Color){128, 128, 128, 255}     // Grey
 #define WOOD_COLOR   (Color){139, 69, 19, 255}       // Brown
-//
+
 // Particle properties
 #define PARTICLE_INVISIBLE            (1 << 0)
 #define PARTICLE_AFFECTED_BY_GRAVITY  (1 << 1)
 #define PARTICLE_FLAMMABLE            (1 << 2)
 #define PARTICLE_EXPLOSIVE            (1 << 3)
+
+#define BORDER (Particle){PARTICLE_BORDER, BORDER_COLOR, 0,                            false}
+#define AIR    (Particle){PARTICLE_AIR,    AIR_COLOR,    PARTICLE_INVISIBLE,           false}
+#define SAND   (Particle){PARTICLE_SAND,   SAND_COLOR,   PARTICLE_AFFECTED_BY_GRAVITY, false}
+#define WATER  (Particle){PARTICLE_WATER,  WATER_COLOR,  PARTICLE_AFFECTED_BY_GRAVITY, false}
+#define STONE  (Particle){PARTICLE_STONE,  STONE_COLOR,  0,                            false}
+#define WOOD   (Particle){PARTICLE_WOOD,   WOOD_COLOR,   PARTICLE_FLAMMABLE,           false}
 
 typedef enum {
 	PARTICLE_BORDER,
@@ -44,6 +51,7 @@ typedef struct {
 	bool showFPS;
 	bool showBrushInfo;
 	bool showCanvasPrefabInfo;
+	bool showOpQueueInfo;
 } DebugInfo;
 
 typedef struct {
@@ -58,6 +66,7 @@ typedef struct {
 	IntVec2 *points;   // brush particle points
 	ParticleType type; // brush particle type
 } BrushCursor;
+void SwitchBrushType(BrushCursor *cursor, ParticleType type);
 
 typedef struct {
 	ParticleType type;
@@ -74,12 +83,6 @@ inline bool IsWater(Particle particle) { return particle.type == PARTICLE_WATER;
 inline bool IsStone(Particle particle) { return particle.type == PARTICLE_STONE; }
 inline bool IsWood(Particle particle) { return particle.type == PARTICLE_WOOD; }
 
-#define BORDER (Particle){PARTICLE_BORDER, BORDER_COLOR, 0,                            false}
-#define AIR    (Particle){PARTICLE_AIR,    AIR_COLOR,    PARTICLE_INVISIBLE,           false}
-#define SAND   (Particle){PARTICLE_SAND,   SAND_COLOR,   PARTICLE_AFFECTED_BY_GRAVITY, false}
-#define WATER  (Particle){PARTICLE_WATER,  WATER_COLOR,  PARTICLE_AFFECTED_BY_GRAVITY, false}
-#define STONE  (Particle){PARTICLE_STONE,  STONE_COLOR,  0,                            false}
-#define WOOD   (Particle){PARTICLE_WOOD,   WOOD_COLOR,   PARTICLE_FLAMMABLE,           false}
 
 typedef struct {
 	Rectangle *recs;
@@ -96,9 +99,11 @@ void MainLoop();
 
 void UpdateGameTick();
 
+void HandleOperation();
+
 void UpdateBrushCursor(BrushCursor *cursor);
 
-void UpdateBrushOperation(BrushCursor *cursor);
+void HandleBrushOperation();
 
 void UpdateSand(Canvas *canvas, size_t r, size_t c);
 
