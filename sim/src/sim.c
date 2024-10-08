@@ -86,7 +86,6 @@ void UpdateGameTick() {
 }
 
 void SwitchBrushType(BrushCursor *cursor, ParticleType type) {
-	printf("%d\n", type);
 	cursor->type = type;
 	cursor->color = GetParticleByType(type).color;
 }
