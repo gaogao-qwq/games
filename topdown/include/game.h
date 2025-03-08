@@ -1,10 +1,12 @@
 #ifndef GAME_DEF_H_
 #define GAME_DEF_H_ 1
 
+#include <math.h>
 #include <raylib.h>
 #include <rlgl.h>
 #include <stdio.h>
-#include <math.h>
+
+// clang-format off
 
 typedef signed char            		i8;
 typedef unsigned char          		u8;
@@ -16,6 +18,8 @@ typedef float                  		f32;
 typedef signed long long int   		i64;
 typedef unsigned long long int 		u64;
 typedef double                 		f64;
+
+#define MAX_LIGHT 64
 
 #define PLAYER_ACCELERATION 20.f
 #define PLAYER_DECELERATION 30.f
@@ -34,18 +38,19 @@ typedef double                 		f64;
 #define IS_ON_BOTTOM(ay, by) ((bool) ((f32)ay > (f32)by))
 #define IS_ON_LEFT(ax, bx) ((bool) ((f32)ax < (f32)bx))
 
+// clang-format on
 typedef enum Direction {
-	top = 0,
-	right = 1,
-	bottom = 2,
-	left = 3,
+	top,
+	right,
+	bottom,
+	left,
 } Direction;
 
 typedef struct Velocity {
-	f32 vt; 		// Top
-	f32 vr; 		// Right
-	f32 vb; 		// Bottom
-	f32 vl; 		// Left
+	f32 vt;	 // Top
+	f32 vr;	 // Right
+	f32 vb;	 // Bottom
+	f32 vl;	 // Left
 } Velocity;
 
 typedef struct Player {
@@ -82,7 +87,7 @@ void UpdateText(Player player, f32 fps);
 //------------------------------------------------------------------------------
 // Utility functions
 //------------------------------------------------------------------------------
-const char *GetBoolalpha(bool value); 		// Get String format bool
-f32 GetHypotenuse(f32 a, f32 b);      		// Get hypotenuse by given legs
+const char *GetBoolalpha(bool value);  // Get String format bool
+f32 GetHypotenuse(f32 a, f32 b);	   // Get hypotenuse by given legs
 
 #endif

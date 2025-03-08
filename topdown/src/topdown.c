@@ -1,5 +1,7 @@
 #include "game.h"
 #include "raylib.h"
+#include "raymath.h"
+#include "rlgl.h"
 
 static DebugInfo debugInfo = {
 #ifdef DEBUG
@@ -9,11 +11,11 @@ static DebugInfo debugInfo = {
 #endif
 };
 
-static const i32 screenWidth = 800;
-static const i32 screenHeight = 600;
+static const i32 initScreenWidth = 800;
+static const i32 initScreenHeight = 600;
 
 static Player player = {
-	.location = {.x = screenHeight / 2.f, .y = screenWidth / 2.f},
+	.location = {.x = initScreenHeight / 2.f, .y = initScreenWidth / 2.f},
 	.rect = {.x = 480, .y = 310, .width = 40, .height = 40},
 	.hitbox = {.x = 480, .y = 310, .width = 40, .height = 40},
 	.velocity = {.vt = 0, .vr = 0, .vb = 0, .vl = 0},
@@ -21,26 +23,28 @@ static Player player = {
 
 static EnvItem envItems[] = {
 	{.rect = {.x = -1000, .y = -1000, .width = 2000, .height = 2000},
-	 .blocking = false,
-	 .moving = false,
-	 .color = LIGHTGRAY},
+     .blocking = false,
+     .moving = false,
+     .color = LIGHTGRAY},
 	{.rect = {.x = 0, .y = 400, .width = 1000, .height = 200},
-	 .blocking = true,
-	 .moving = false,
-	 .color = GRAY},
+     .blocking = true,
+     .moving = false,
+     .color = GRAY},
 	{.rect = {.x = 0, .y = 0, .width = 100, .height = 400},
-	 .blocking = true,
-	 .moving = false,
-	 .color = GRAY},
+     .blocking = true,
+     .moving = false,
+     .color = GRAY},
 	{.rect = {.x = 150, .y = 300, .width = 100, .height = 10},
-	 .blocking = true,
-	 .moving = false,
-	 .color = GRAY}};
+     .blocking = true,
+     .moving = false,
+     .color = GRAY}};
 static i32 envItemsLength = sizeof(envItems) / sizeof(envItems[0]);
 
+static RenderTexture lights[MAX_LIGHT] = {0};
+
 static Camera2D camera = {
-	.offset = {.x = screenWidth / 2.f, .y = screenHeight / 2.f},
-	.target = {.x = screenHeight / 2.f, .y = screenWidth / 2.f},
+	.offset = {.x = initScreenWidth / 2.f, .y = initScreenHeight / 2.f},
+	.target = {.x = initScreenHeight / 2.f, .y = initScreenWidth / 2.f},
 	.rotation = 0.f,
 	.zoom = 1.f};
 
@@ -50,33 +54,44 @@ void MainLoop() {
 	f32 fps = GetFPS();
 	f32 deltaTime = GetFrameTime();
 	f32 wheel = GetMouseWheelMove();
+	RenderTexture lightMask =
+		LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
 
 	UpdateDebugInfo();
 	UpdatePlayer(&player, envItems, envItemsLength, deltaTime);
 	UpdateCamera2D(&camera, player.location, wheel);
 
 	// clang-format off
-		// Draw
-		//----------------------------------------------------------------------
-		BeginDrawing();
+	BeginTextureMode(lightMask);
+		rlSetBlendFactors(RL_SRC_ALPHA, RL_SRC_ALPHA, RL_MIN);
+		rlSetBlendMode(BLEND_CUSTOM);
+		DrawTextureRec(lights[0].texture, (Rectangle){ 0, 0, (float)GetScreenWidth(), -(float)GetScreenHeight() }, Vector2Zero(), WHITE);
+		rlDrawRenderBatchActive();
+		rlSetBlendMode(BLEND_ALPHA);
+	EndTextureMode();
 
-			ClearBackground(RAYWHITE);
+	UnloadRenderTexture(lightMask);
+	// Draw
+	//----------------------------------------------------------------------
+	BeginDrawing();
 
-			BeginMode2D(camera);
+		ClearBackground(RAYWHITE);
 
-				for (i32 i = 0; i < envItemsLength; ++i) {
-					DrawRectangleRec(envItems[i].rect, envItems[i].color);
-				}
-				DrawRectangleRec(player.rect, RED);
-				if (debugInfo.showPlayerHitbox) {
-					DrawRectangleLines(player.hitbox.x, player.hitbox.y, player.hitbox.width, player.hitbox.height, BLUE);
-				}
+		BeginMode2D(camera);
 
-			EndMode2D();
+			for (i32 i = 0; i < envItemsLength; ++i) {
+				DrawRectangleRec(envItems[i].rect, envItems[i].color);
+			}
+			DrawRectangleRec(player.rect, RED);
+			if (debugInfo.showPlayerHitbox) {
+				DrawRectangleLines(player.hitbox.x, player.hitbox.y, player.hitbox.width, player.hitbox.height, BLUE);
+			}
 
-			UpdateText(player, fps);
+		EndMode2D();
 
-		EndDrawing();
+		UpdateText(player, fps);
+
+	EndDrawing();
 	// clang-format on
 }
 
@@ -86,8 +101,9 @@ void MainLoop() {
 i32 main(void) {
 	// Initialization
 	//--------------------------------------------------------------------------
-	InitWindow(screenWidth, screenHeight, "Hmmm...");
-	SetConfigFlags(64);
+	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE);
+	SetTraceLogLevel(LOG_WARNING);
+	InitWindow(initScreenWidth, initScreenHeight, "top down");
 	SetExitKey(KEY_ESCAPE);
 	SetTargetFPS(60);
 
@@ -104,7 +120,7 @@ i32 main(void) {
 }
 
 void UpdatePlayer(Player *player, EnvItem *envItems, i32 envItemsLength,
-				  f32 delta) {
+                  f32 delta) {
 	Vector2 *p = &(player->location);
 	Velocity *v = &(player->velocity);
 	Rectangle h = player->hitbox;
@@ -153,7 +169,6 @@ void UpdatePlayer(Player *player, EnvItem *envItems, i32 envItemsLength,
 	for (i32 i = 0; i < envItemsLength; ++i) {
 		EnvItem *ei = envItems + i;
 		if (ei->blocking && CheckCollisionRecs(h, ei->rect)) {
-			Rectangle crec = GetCollisionRec(h, ei->rect);
 			hitObstacle = true;
 			break;
 		}
@@ -176,17 +191,17 @@ void UpdateDebugInfo() {
 	if (IsKeyPressed(KEY_H)) {
 		debugInfo.showPlayerHitbox = !debugInfo.showPlayerHitbox;
 		TraceLog(LOG_INFO, "Toggle showPlayerHitbox to %s",
-				 GetBoolalpha(debugInfo.showPlayerHitbox));
+		         GetBoolalpha(debugInfo.showPlayerHitbox));
 	}
 	if (IsKeyPressed(KEY_V)) {
 		debugInfo.showPlayerVelocity = !debugInfo.showPlayerVelocity;
 		TraceLog(LOG_INFO, "Toggle showPlayerSpeed to %s",
-				 GetBoolalpha(debugInfo.showPlayerVelocity));
+		         GetBoolalpha(debugInfo.showPlayerVelocity));
 	}
 	if (IsKeyPressed(KEY_F)) {
 		debugInfo.showFPS = !debugInfo.showFPS;
 		TraceLog(LOG_INFO, "Toggle showFPS to %s",
-				 GetBoolalpha(debugInfo.showFPS));
+		         GetBoolalpha(debugInfo.showFPS));
 	}
 }
 
@@ -194,7 +209,7 @@ void UpdateText(Player player, f32 fps) {
 	if (debugInfo.showPlayerVelocity) {
 		char playerVelocityText[50];
 		f32 v = GetHypotenuse(player.velocity.vt - player.velocity.vb,
-							  player.velocity.vr - player.velocity.vl);
+		                      player.velocity.vr - player.velocity.vl);
 		sprintf(playerVelocityText, "Player velocity: %f", v);
 		DrawText(playerVelocityText, 20, 30, 10, BLACK);
 	}
