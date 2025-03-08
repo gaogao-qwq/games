@@ -96,31 +96,18 @@ typedef struct {
 } Canvas;
 
 void MainLoop();
-
 void UpdateGameTick();
-
-void HandleOperation();
-
+void ConsumeOpQueue();
 void UpdateBrushCursor(BrushCursor *cursor);
-
 void HandleBrushOperation();
-
 void UpdateSand(Canvas *canvas, size_t r, size_t c);
-
 void UpdateWater(Canvas *canvas, size_t r, size_t c);
-
 void UpdateParticles(Canvas *canvas);
-
 void UpdateCanvasPrefab(Canvas *canvas);
-
 void DrawBrushCursor(BrushCursor cursor);
-
 void BrushDraw(BrushCursor cursor, Canvas *canvas);
-
 void InitCanvas(size_t width, size_t height);
-
 void DrawCanvasPrefab(CanvasPrefab canvasPrefab);
-
 void DrawDebugInfo(BrushCursor cursor);
 
 #endif

@@ -4,6 +4,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+char *strjoin(char *restrict dst, const char **restrict strs, size_t len,
+              const char *restrict delim) {
+	if (dst == NULL) return dst;
+	size_t i;
+	if (delim == NULL || !strlen(delim)) {
+		for (i = 0; i < len; ++i) {
+			strcat(dst, strs[i]);
+		}
+		return dst;
+	}
+
+	for (i = 0; i < len; ++i) {
+		strcat(dst, strs[i]);
+		if (i < len - 1) strcat(dst, delim);
+	}
+	return dst;
+}
+
 OpQueue *MakeEmptyOpQueue() { return calloc(1, sizeof(OpQueue)); }
 
 void OpQueuePush(OpQueue *queue, Operation op) {
@@ -38,14 +56,12 @@ void OpQueuePop(OpQueue *queue) {
 	--queue->len;
 }
 
-const char *BumpQueue(OpQueue *queue) {
-	if (queue->len == 0) return "";
-
-	char *nodeStrs[queue->len];
+void OpQueueBump(OpQueue *queue) {
+	if (queue->len == 0) return;
 	QueueNode *node = queue->front;
+	fprintf(stdout, "Bumping operation queue:\n");
 	for (size_t i = 0; i < queue->len; ++i) {
-		sprintf(nodeStrs[i], "%d", node->op.type);
+		fprintf(stdout, "\top[%lu]: %d\n", i, node->op.type);
 		node = node->next;
 	}
-	return strsep(nodeStrs, ",");
 }

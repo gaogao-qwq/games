@@ -62,7 +62,7 @@ void MainLoop() {
 	// Update
 	UpdateBrushCursor(&brushCursor);
 	HandleBrushOperation();
-	HandleOperation();
+	ConsumeOpQueue();
 
 	accumulatedFrameTime += GetFrameTime();
 	while (accumulatedFrameTime >= updateFrameTime) {
@@ -114,9 +114,10 @@ void SwapParticle(Particle *a, Particle *b) {
 	*a = *b, *b = tmp;
 }
 
-void HandleOperation() {
+void ConsumeOpQueue() {
 	if (!opQueue->len) return;
 
+	OpQueueBump(opQueue);
 	QueueNode *node = opQueue->front;
 	switch (node->op.type) {
 		case OP_BRUSH_DRAW:
@@ -149,8 +150,10 @@ void UpdateBrushCursor(BrushCursor *cursor) {
 	y -= cursor->size / 2 * PARTICLE_SIZE;
 	cursor->position = (IntVec2){x, y};
 
-	// Guard clause
+	// Guard
 	if (cursor->points != NULL) return;
+
+	// PERF: mid point circle algo
 
 	IntVec2 *brush_points =
 		malloc(sizeof(IntVec2) * cursor->size * cursor->size);
@@ -233,24 +236,24 @@ void UpdateSand(Canvas *canvas, size_t r, size_t c) {
 	} else if (c > 0 && canvas->particles[r + 1][c - 1].type == PARTICLE_AIR) {
 		// Left down
 		SwapParticle(&canvas->particles[r][c],
-					 &canvas->particles[r + 1][c - 1]);
+		             &canvas->particles[r + 1][c - 1]);
 		canvas->particles[r + 1][c - 1].updated = true;
 	} else if (c > 0 &&
-			   canvas->particles[r + 1][c - 1].type == PARTICLE_WATER) {
+	           canvas->particles[r + 1][c - 1].type == PARTICLE_WATER) {
 		SwapParticle(&canvas->particles[r][c],
-					 &canvas->particles[r + 1][c - 1]);
+		             &canvas->particles[r + 1][c - 1]);
 		canvas->particles[r + 1][c - 1].updated = true;
 		UpdateWater(canvas, r, c);
 	} else if (c + 1 < canvas->width &&
-			   canvas->particles[r + 1][c + 1].type == PARTICLE_AIR) {
+	           canvas->particles[r + 1][c + 1].type == PARTICLE_AIR) {
 		// Right down
 		SwapParticle(&canvas->particles[r][c],
-					 &canvas->particles[r + 1][c + 1]);
+		             &canvas->particles[r + 1][c + 1]);
 		canvas->particles[r + 1][c + 1].updated = true;
 	} else if (c + 1 < canvas->width &&
-			   canvas->particles[r + 1][c + 1].type == PARTICLE_WATER) {
+	           canvas->particles[r + 1][c + 1].type == PARTICLE_WATER) {
 		SwapParticle(&canvas->particles[r][c],
-					 &canvas->particles[r + 1][c + 1]);
+		             &canvas->particles[r + 1][c + 1]);
 		canvas->particles[r + 1][c + 1].updated = true;
 		UpdateWater(canvas, r, c);
 	}
@@ -259,7 +262,7 @@ void UpdateSand(Canvas *canvas, size_t r, size_t c) {
 void UpdateWater(Canvas *canvas, size_t r, size_t c) {
 	// Down
 	if (r + 1 < canvas->height &&
-		canvas->particles[r + 1][c].type == PARTICLE_AIR) {
+	    canvas->particles[r + 1][c].type == PARTICLE_AIR) {
 		SwapParticle(&canvas->particles[r][c], &canvas->particles[r + 1][c]);
 		canvas->particles[r + 1][c].updated = true;
 		return;
@@ -267,25 +270,25 @@ void UpdateWater(Canvas *canvas, size_t r, size_t c) {
 
 	// Left down or Right down
 	if (r + 1 < canvas->height && c > 0 && c + 1 < canvas->width &&
-		canvas->particles[r + 1][c - 1].type == PARTICLE_AIR &&
-		canvas->particles[r + 1][c + 1].type == PARTICLE_AIR) {
+	    canvas->particles[r + 1][c - 1].type == PARTICLE_AIR &&
+	    canvas->particles[r + 1][c + 1].type == PARTICLE_AIR) {
 		return;
 	}
 
 	// Left down
 	if (r + 1 < canvas->height && c > 0 &&
-		canvas->particles[r + 1][c - 1].type == PARTICLE_AIR) {
+	    canvas->particles[r + 1][c - 1].type == PARTICLE_AIR) {
 		SwapParticle(&canvas->particles[r][c],
-					 &canvas->particles[r + 1][c - 1]);
+		             &canvas->particles[r + 1][c - 1]);
 		canvas->particles[r + 1][c - 1].updated = true;
 		return;
 	}
 
 	// Right down
 	if (r + 1 < canvas->height && c + 1 < canvas->width &&
-		canvas->particles[r + 1][c + 1].type == PARTICLE_AIR) {
+	    canvas->particles[r + 1][c + 1].type == PARTICLE_AIR) {
 		SwapParticle(&canvas->particles[r][c],
-					 &canvas->particles[r + 1][c + 1]);
+		             &canvas->particles[r + 1][c + 1]);
 		canvas->particles[r + 1][c + 1].updated = true;
 		return;
 	}
@@ -300,7 +303,7 @@ void UpdateWater(Canvas *canvas, size_t r, size_t c) {
 
 	// Right
 	if (c + 1 < canvas->width &&
-		canvas->particles[r][c + 1].type == PARTICLE_AIR) {
+	    canvas->particles[r][c + 1].type == PARTICLE_AIR) {
 		SwapParticle(&canvas->particles[r][c], &canvas->particles[r][c + 1]);
 		canvas->particles[r][c + 1].updated = true;
 		return;
@@ -392,12 +395,12 @@ void UpdateCanvasPrefab(Canvas *canvas) {
 				canvasPrefab.recs = realloc(
 					canvasPrefab.recs, sizeof(Rectangle) * canvasPrefab.len);
 				canvasPrefab.colors = realloc(canvasPrefab.colors,
-											  sizeof(Color) * canvasPrefab.len);
+				                              sizeof(Color) * canvasPrefab.len);
 			}
 
 			canvasPrefab.recs[idx] =
 				(Rectangle){j * PARTICLE_SIZE, i * PARTICLE_SIZE,
-							width * PARTICLE_SIZE, height * PARTICLE_SIZE};
+			                width * PARTICLE_SIZE, height * PARTICLE_SIZE};
 			canvasPrefab.colors[idx++] = canvas->particles[i][j].color;
 
 			if (width == canvas->width) i = height - 1;
@@ -413,8 +416,8 @@ void DrawBrushCursor(BrushCursor cursor) {
 	for (size_t i = 0; i < cursor.p_count; ++i) {
 		DrawRectangleRec(
 			(Rectangle){cursor.position.x + cursor.points[i].x * PARTICLE_SIZE,
-						cursor.position.y + cursor.points[i].y * PARTICLE_SIZE,
-						PARTICLE_SIZE, PARTICLE_SIZE},
+		                cursor.position.y + cursor.points[i].y * PARTICLE_SIZE,
+		                PARTICLE_SIZE, PARTICLE_SIZE},
 			cursor.color);
 	}
 }
@@ -422,9 +425,9 @@ void DrawBrushCursor(BrushCursor cursor) {
 void BrushDraw(BrushCursor cursor, Canvas *canvas) {
 	for (size_t i = 0; i < cursor.p_count; ++i) {
 		size_t r = (cursor.position.y + (cursor.points[i].y * PARTICLE_SIZE)) /
-				   PARTICLE_SIZE;
+		           PARTICLE_SIZE;
 		size_t c = (cursor.position.x + (cursor.points[i].x * PARTICLE_SIZE)) /
-				   PARTICLE_SIZE;
+		           PARTICLE_SIZE;
 		if (r < canvas->height && c < canvas->width) {
 			canvas->particles[r][c] = GetParticleByType(cursor.type);
 		}
@@ -464,7 +467,7 @@ void DrawDebugInfo(BrushCursor cursor) {
 	if (debugInfo.showBrushCursorPosition) {
 		char brushCursorLocationText[64];
 		sprintf(brushCursorLocationText, "Brush position: x: %d, y: %d",
-				cursor.position.x, cursor.position.y);
+		        cursor.position.x, cursor.position.y);
 		DrawText(brushCursorLocationText, 50, 60, 10, RAYWHITE);
 	}
 
@@ -517,7 +520,7 @@ void DrawDebugInfo(BrushCursor cursor) {
 	if (debugInfo.showCanvasPrefabInfo) {
 		char canvasPrefabInfoText[64];
 		sprintf(canvasPrefabInfoText, "Canvas prefab recs count: %lu",
-				canvasPrefab.len);
+		        canvasPrefab.len);
 		DrawText(canvasPrefabInfoText, 50, 110, 10, RAYWHITE);
 		for (size_t i = 0; i < canvasPrefab.len; ++i) {
 			DrawRectangleLinesEx(canvasPrefab.recs[i], 0.5, RED);

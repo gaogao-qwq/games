@@ -26,6 +26,6 @@ typedef struct {
 OpQueue *MakeEmptyOpQueue();
 void OpQueuePush(OpQueue *queue, Operation op);
 void OpQueuePop(OpQueue *queue);
-const char *BumpQueue(OpQueue *queue);
+void OpQueueBump(OpQueue *queue);
 
 #endif
