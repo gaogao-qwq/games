@@ -8,6 +8,7 @@ personal enjoyment and learning purposes, thus it has absolute NO WARRANTY.
 
 ```txt
 .
+├── fps           # A fps demo
 ├── sim           # A falling sand simulation demo
 └── topdown       # A top-down view demo
 ```
