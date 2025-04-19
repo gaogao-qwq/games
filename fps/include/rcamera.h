@@ -1,1 +1,0 @@
-../external/raylib/src/rcamera.h

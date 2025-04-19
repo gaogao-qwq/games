@@ -1,1 +1,0 @@
-../external/raylib/src/external/win32_clipboard.h

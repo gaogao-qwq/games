@@ -1,1 +1,0 @@
-../external/raylib/src/external/tinyobj_loader_c.h

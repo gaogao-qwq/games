@@ -5,7 +5,10 @@ LIBS := $(wildcard lib/*.a)
 OBJS := $(patsubst src/%.cpp, build/%.o, $(SRCS))
 
 CXX ?= g++
-CXXFLAGS ?= -Iinclude -Wall -Wextra --std=c++2a
+CXXFLAGS ?= -Iinclude -Iexternal/raylib-cpp/include \
+			-Iexternal/raylib/src -Iexternal/raylib/src/external \
+			-Iexternal/raylib/src/glfw/include \
+			-Wall -Wextra --std=c++2a
 LDFLAGS := -Llib
 TARGET := fps
 

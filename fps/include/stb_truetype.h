@@ -1,1 +1,0 @@
-../external/raylib/src/external/stb_truetype.h
