@@ -9,3 +9,9 @@
 	url = https://github.com/raysan5/raylib.git
 	branch = 5.0
 	shallow = true
+
+[submodule "fps-raylib"]
+	path = fps/external/raylib
+	url = https://github.com/raysan5/raylib.git
+	branch = 5.5
+	shallow = true

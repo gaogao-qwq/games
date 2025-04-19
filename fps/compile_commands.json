@@ -1,0 +1,18 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Iinclude",
+      "-Wall",
+      "-Wextra",
+      "--std=c++2a",
+      "-c",
+      "-o",
+      "build/fps.o",
+      "src/fps.cpp"
+    ],
+    "directory": "/home/gaogao-qwq/repo/games/fps",
+    "file": "/home/gaogao-qwq/repo/games/fps/src/fps.cpp",
+    "output": "/home/gaogao-qwq/repo/games/fps/build/fps.o"
+  }
+]
