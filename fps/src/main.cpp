@@ -15,10 +15,12 @@ int main(void) {
 
 		// clang-format off
 		playerScreen.BeginMode();
-			ClearBackground(RAYWHITE);
+			ClearBackground(Color{185, 237, 255, 255});
 			fps::player.camera.BeginMode();
-				for (auto &obj : fps::gameObjects) obj->Draw();
-				fps::player.Draw();
+				for (auto &obj : fps::gameObjects) {
+					obj->DrawBounding();
+					obj->Draw();
+				}
 			fps::player.camera.EndMode();
 			fps::player.DrawCrosshair(fps::gameConfig.resolution.width, fps::gameConfig.resolution.height);
 		playerScreen.EndMode();
@@ -28,7 +30,7 @@ int main(void) {
 			DrawRectangleLinesEx(Rectangle{0.0f, 0.0f, 200.0f, 100.0f}, 1.0f, BLACK);
 			fps::editCamera.BeginMode();
 				for (auto &obj : fps::gameObjects) obj->Draw();
-				fps::player.Draw();
+				fps::player.DrawBoundingBox();
 				fps::player.DrawTarget();
 			fps::editCamera.EndMode();
 		editScreen.EndMode();
@@ -46,10 +48,10 @@ int main(void) {
 				TextFormat("player camera target: (%f %f %f)", fps::player.camera.target.x, fps::player.camera.target.y, fps::player.camera.target.z),
 				10, 50, 10, BLACK);
 			raylib::DrawText(
-				TextFormat("player facing degree: %f", fps::player.angle_deg),
+				TextFormat("player facing degree: %f", fps::player.FacingAngle()),
 				10, 60, 10, BLACK);
 			raylib::DrawText(
-				TextFormat("player facing: %s", fps::direction_to_string(fps::player.facing)),
+				TextFormat("player facing: %s", fps::direction_to_string(fps::player.FacingDirection())),
 				10, 70, 10, BLACK);
 			raylib::DrawText(
 				TextFormat("player velocity: (%f %f %f)", fps::player.velocity.x, fps::player.velocity.y, fps::player.velocity.z),
