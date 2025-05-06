@@ -21,6 +21,8 @@ std::vector<std::unique_ptr<GameObject>> gameObjects = []() {
 	vec.emplace_back(std::make_unique<Block>(Vector3{-1.0f, -1.0f, 0.0f}, GREEN));
 	vec.emplace_back(std::make_unique<Block>(Vector3{0.0f, -1.0f, -1.0f}, GREEN));
 	vec.emplace_back(std::make_unique<Block>(Vector3{-1.0f, -1.0f, -1.0f}, GREEN));
+	vec.emplace_back(std::make_unique<Block>(Vector3{-2.0f, 0.0f, -1.0f}, GREEN));
+	vec.emplace_back(std::make_unique<Block>(Vector3{-2.0f, -1.0f, -1.0f}, GREEN));
 	vec.emplace_back(std::make_unique<Cube>(Vector3{-16.0f, 1.0f, -16.0f}, 1.0f, 2.0f, 1.0f, VIOLET));
 	vec.emplace_back(std::make_unique<Cube>(Vector3{16.0f, 1.0f, -16.0f}, 1.0f, 2.0f, 1.0f, VIOLET));
 	vec.emplace_back(std::make_unique<Cube>(Vector3{-16.0f, 1.0f, 16.0f}, 1.0f, 2.0f, 1.0f, VIOLET));

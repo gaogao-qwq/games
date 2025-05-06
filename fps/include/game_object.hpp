@@ -1,14 +1,10 @@
 #ifndef GAME_OBJECT_HPP_
 #define GAME_OBJECT_HPP_ 1
-#include <raylib.h>
-
 #include <direction.hpp>
-#include <game_config.hpp>
 #include <raylib-cpp.hpp>
 
 namespace fps::game_object {
 using namespace fps::direction;
-using namespace fps::game_config;
 
 class GameObject {
    protected:
@@ -16,9 +12,10 @@ class GameObject {
 
    public:
 	explicit GameObject(const raylib::Vector3& position) noexcept : position(position) {};
-	virtual ~GameObject()             = default;
-	virtual void Draw() const         = 0;
-	virtual void DrawBounding() const = 0;
+	virtual ~GameObject()                                        = default;
+	virtual void draw() const                                    = 0;
+	virtual void draw_bounding() const                           = 0;
+	virtual bool collide(const raylib::BoundingBox& other) const = 0;
 };
 
 class Cube : public GameObject {
@@ -31,11 +28,13 @@ class Cube : public GameObject {
 	Cube(raylib::Vector3 position, float width, float height, float length, raylib::Color color)
 		: GameObject(position), width(width), height(height), length(length), color(color) {};
 
-	void Draw() const override {
+	void draw() const override {
 		DrawCube(position, width, height, length, color);
 	}
 
-	void DrawBounding() const override {}
+	void draw_bounding() const override {}
+
+	bool collide(const raylib::BoundingBox& other) const override { return false; }
 };
 
 class Plane : public GameObject {
@@ -47,11 +46,13 @@ class Plane : public GameObject {
 	Plane(raylib::Vector3 position, float width, float height, raylib::Color color)
 		: GameObject(position), width(width), height(height), color(color) {};
 
-	void Draw() const override {
+	void draw() const override {
 		DrawPlane(position, Vector2{width, height}, color);
 	}
 
-	void DrawBounding() const override {}
+	void draw_bounding() const override {}
+
+	bool collide(const raylib::BoundingBox& other) const override { return false; }
 };
 
 class Grid : public GameObject {
@@ -62,11 +63,13 @@ class Grid : public GameObject {
 	Grid(int slices, float spacing)
 		: GameObject(Vector3{0.0f, 0.0f, 0.0f}), slices(slices), spacing(spacing) {};
 
-	void Draw() const override {
+	void draw() const override {
 		DrawGrid(slices, spacing);
 	}
 
-	void DrawBounding() const override {}
+	void draw_bounding() const override {}
+
+	bool collide(const raylib::BoundingBox& other) const override { return false; }
 };
 
 class Block : public GameObject {
@@ -82,15 +85,15 @@ class Block : public GameObject {
 			  .max = Vector3(position + Vector3{1.0f, 1.0f, 1.0f}),
 		  }) {}
 
-	void Draw() const override {
+	void draw() const override {
 		DrawCube(position + Vector3{0.5f, 0.5f, 0.5f}, 1.0f, 1.0f, 1.0f, color);
 	}
 
-	void DrawBounding() const override {
+	void draw_bounding() const override {
 		bounding.Draw(RED);
 	}
 
-	bool Collide(const raylib::BoundingBox& other) {
+	bool collide(const raylib::BoundingBox& other) const override {
 		return bounding.CheckCollision(other);
 	}
 };
@@ -119,108 +122,27 @@ class Player {
 		return raylib::Vector3(camera.position);
 	}
 
-	float FacingAngle() {
+	float facing_angle() {
 		Vector2 facingVec2 = raylib::Vector2(camera.target.x, camera.target.z) - raylib::Vector2(camera.position.x, camera.position.z);
 		return Vector2Angle(NORTH_VEC, facingVec2) * RAD2DEG;
 	}
 
-	Direction FacingDirection() {
-		return deg_to_direction(FacingAngle());
+	Direction facing_direction() {
+		return deg_to_direction(facing_angle());
 	}
 
-	void Update() {
-		float dt = GetFrameTime();
-
-		if (IsKeyDown(KEY_W) && IsKeyDown(KEY_S)) {
-			if (velocity.z < 0.0f) {
-				velocity.z = std::min(velocity.z + player_deceleration * 1.5f * dt, 0.0f);
-			} else if (velocity.z > 0.0f) {
-				velocity.z = std::max(velocity.z - player_deceleration * 1.5f * dt, 0.0f);
-			}
-		} else {
-			// forward
-			if (IsKeyDown(KEY_W)) {
-				if (velocity.z >= -player_max_velocity) {
-					velocity.z = std::max(velocity.z - player_acceleration * dt, -player_max_velocity);
-				}
-			} else {
-				if (velocity.z < 0.0f) {
-					velocity.z = std::min(velocity.z + player_deceleration * dt, 0.0f);
-				}
-			}
-
-			// backward
-			if (IsKeyDown(KEY_S)) {
-				if (velocity.z <= player_max_velocity) {
-					velocity.z = std::min(velocity.z + player_acceleration * dt, player_max_velocity);
-				}
-			} else {
-				if (velocity.z > 0.0f) {
-					velocity.z = std::max(velocity.z - player_deceleration * dt, 0.0f);
-				}
-			}
-		}
-
-		if (IsKeyDown(KEY_A) && IsKeyDown(KEY_D)) {
-			if (velocity.x < 0.0f) {
-				velocity.x = std::min(velocity.x + player_deceleration * 1.5f * dt, 0.0f);
-			} else if (velocity.x > 0.0f) {
-				velocity.x = std::max(velocity.x - player_deceleration * 1.5f * dt, 0.0f);
-			}
-		} else {
-			// left
-			if (IsKeyDown(KEY_A)) {
-				if (velocity.x >= -player_max_velocity) {
-					velocity.x = std::max(velocity.x - player_acceleration * dt, -player_max_velocity);
-				}
-			} else {
-				if (velocity.x < 0.0f) {
-					velocity.x = std::min(velocity.x + player_deceleration * dt, 0.0f);
-				}
-			}
-
-			// right
-			if (IsKeyDown(KEY_D)) {
-				if (velocity.x <= player_max_velocity) {
-					velocity.x = std::min(velocity.x + player_acceleration * dt, player_max_velocity);
-				}
-			} else {
-				if (velocity.x > 0.0f) {
-					velocity.x = std::max(velocity.x - player_deceleration * dt, 0.0f);
-				}
-			}
-		}
-
-		Vector3 cameraMovement = {
-			.x = -velocity.z * dt,  // forward-backward
-			.y = velocity.x * dt,   // right-left
-			.z = velocity.y * dt,   // up-down
-		};
-		Vector3 cameraRotation = {
-			.x = GetMouseDelta().x * dt * player_yaw_acceleration,    // yaw
-			.y = GetMouseDelta().y * dt * player_pitch_acceleration,  // pitch
-			.z = 0.0f,                                                // roll
-		};
-		float zoom = 0.0f;
-
-		camera.GetPosition();
-		camera.Update(cameraMovement, cameraRotation, zoom);
-		bounding.min = raylib::Vector3(camera.position) + Vector3{-0.5f, -2.0f, -0.5f};
-		bounding.max = raylib::Vector3(camera.position) + Vector3{0.5f, 0.0f, 0.5f};
-	}
-
-	void DrawBoundingBox() {
+	void draw_bounding_box() {
 		bounding.Draw(RED);
 	}
 
-	void DrawCrosshair(int screenWidth, int screenHeight) {
-		DrawRectangle(screenWidth / 2 - 10, screenHeight / 2 - 1, 20, 2, ColorAlpha(BLACK, 0.8f));
-		DrawRectangle(screenWidth / 2 - 1, screenHeight / 2 - 10, 2, 20, ColorAlpha(BLACK, 0.8f));
-	}
-
-	void DrawTarget() {
+	void draw_target() {
 		DrawCube(camera.target, 0.5f, 0.5f, 0.5f, BLUE);
 	}
+
+	void move_forward(float distance);
+	void move_right(float distance);
+	void move_up(float distance);
+	void update();
 };
 }  // namespace fps::game_object
 

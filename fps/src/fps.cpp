@@ -23,6 +23,6 @@ void update_player() {
 		auto type = inputQueue.front().type;
 		inputQueue.pop_front();
 	}
-	player.Update();
+	player.update();
 }
 }  // namespace fps
