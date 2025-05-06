@@ -32,6 +32,8 @@ class GameConfig {
 		}) : resolution(resolution), fov(fov), keybind(keybind) {};
 };
 
+extern float gravity_acceleration;
+extern float gravity_max_velocity;
 extern float player_acceleration;
 extern float player_deceleration;
 extern float player_max_velocity;

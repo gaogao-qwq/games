@@ -15,12 +15,19 @@ raylib::Camera3D      editCamera  = raylib::Camera3D({
 
 std::vector<std::unique_ptr<GameObject>> gameObjects = []() {
 	std::vector<std::unique_ptr<GameObject>> vec;
-	vec.emplace_back(std::make_unique<Grid>(10, 5.0f));
+	vec.emplace_back(std::make_unique<Grid>(32, 1.0f));
 	// vec.emplace_back(std::make_unique<Plane>(Vector3{0.0f, 0.0f, 0.0f}, 32.0f, 32.0f, LIGHTGRAY));
+	vec.emplace_back(std::make_unique<Block>(Vector3{0.0f, -1.0f, 0.0f}, GREEN));
+	vec.emplace_back(std::make_unique<Block>(Vector3{-1.0f, -1.0f, 0.0f}, GREEN));
+	vec.emplace_back(std::make_unique<Block>(Vector3{0.0f, -1.0f, -1.0f}, GREEN));
+	vec.emplace_back(std::make_unique<Block>(Vector3{-1.0f, -1.0f, -1.0f}, GREEN));
+	vec.emplace_back(std::make_unique<Block>(Vector3{-2.0f, 0.0f, -1.0f}, GREEN));
+	vec.emplace_back(std::make_unique<Block>(Vector3{-2.0f, -1.0f, -1.0f}, GREEN));
 	vec.emplace_back(std::make_unique<Cube>(Vector3{-16.0f, 1.0f, -16.0f}, 1.0f, 2.0f, 1.0f, VIOLET));
 	vec.emplace_back(std::make_unique<Cube>(Vector3{16.0f, 1.0f, -16.0f}, 1.0f, 2.0f, 1.0f, VIOLET));
 	vec.emplace_back(std::make_unique<Cube>(Vector3{-16.0f, 1.0f, 16.0f}, 1.0f, 2.0f, 1.0f, VIOLET));
 	vec.emplace_back(std::make_unique<Cube>(Vector3{16.0f, 1.0f, 16.0f}, 1.0f, 2.0f, 1.0f, VIOLET));
+	// vec.emplace_back(std::make_unique<Block>());
 	return vec;
 }();
 }

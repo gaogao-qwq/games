@@ -10,6 +10,70 @@
       "-Wall",
       "-Wextra",
       "--std=c++2a",
+      "-O2",
+      "-c",
+      "-o",
+      "build/game_ui.o",
+      "src/game_ui.cpp"
+    ],
+    "directory": "/home/gaogao-qwq/repo/games/fps",
+    "file": "/home/gaogao-qwq/repo/games/fps/src/game_ui.cpp",
+    "output": "/home/gaogao-qwq/repo/games/fps/build/game_ui.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Iinclude",
+      "-Iexternal/raylib-cpp/include",
+      "-Iexternal/raylib/src",
+      "-Iexternal/raylib/src/external",
+      "-Iexternal/raylib/src/glfw/include",
+      "-Wall",
+      "-Wextra",
+      "--std=c++2a",
+      "-O2",
+      "-c",
+      "-o",
+      "build/game_state.o",
+      "src/game_state.cpp"
+    ],
+    "directory": "/home/gaogao-qwq/repo/games/fps",
+    "file": "/home/gaogao-qwq/repo/games/fps/src/game_state.cpp",
+    "output": "/home/gaogao-qwq/repo/games/fps/build/game_state.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Iinclude",
+      "-Iexternal/raylib-cpp/include",
+      "-Iexternal/raylib/src",
+      "-Iexternal/raylib/src/external",
+      "-Iexternal/raylib/src/glfw/include",
+      "-Wall",
+      "-Wextra",
+      "--std=c++2a",
+      "-O2",
+      "-c",
+      "-o",
+      "build/game_config.o",
+      "src/game_config.cpp"
+    ],
+    "directory": "/home/gaogao-qwq/repo/games/fps",
+    "file": "/home/gaogao-qwq/repo/games/fps/src/game_config.cpp",
+    "output": "/home/gaogao-qwq/repo/games/fps/build/game_config.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Iinclude",
+      "-Iexternal/raylib-cpp/include",
+      "-Iexternal/raylib/src",
+      "-Iexternal/raylib/src/external",
+      "-Iexternal/raylib/src/glfw/include",
+      "-Wall",
+      "-Wextra",
+      "--std=c++2a",
+      "-O2",
       "-c",
       "-o",
       "build/direction.o",
@@ -30,6 +94,7 @@
       "-Wall",
       "-Wextra",
       "--std=c++2a",
+      "-O2",
       "-c",
       "-o",
       "build/fps.o",
@@ -50,6 +115,7 @@
       "-Wall",
       "-Wextra",
       "--std=c++2a",
+      "-O2",
       "-c",
       "-o",
       "build/main.o",
@@ -58,5 +124,26 @@
     "directory": "/home/gaogao-qwq/repo/games/fps",
     "file": "/home/gaogao-qwq/repo/games/fps/src/main.cpp",
     "output": "/home/gaogao-qwq/repo/games/fps/build/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-Iinclude",
+      "-Iexternal/raylib-cpp/include",
+      "-Iexternal/raylib/src",
+      "-Iexternal/raylib/src/external",
+      "-Iexternal/raylib/src/glfw/include",
+      "-Wall",
+      "-Wextra",
+      "--std=c++2a",
+      "-O2",
+      "-c",
+      "-o",
+      "build/game_object.o",
+      "src/game_object.cpp"
+    ],
+    "directory": "/home/gaogao-qwq/repo/games/fps",
+    "file": "/home/gaogao-qwq/repo/games/fps/src/game_object.cpp",
+    "output": "/home/gaogao-qwq/repo/games/fps/build/game_object.o"
   }
 ]
