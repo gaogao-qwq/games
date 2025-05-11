@@ -1,13 +1,13 @@
 #include <fps.hpp>
 
 int main(void) {
-	SetConfigFlags(FLAG_VSYNC_HINT);
-	raylib::Window        window(fps::gameConfig.resolution.width, fps::gameConfig.resolution.height, "fps");
+	raylib::Window        window(fps::gameConfig.resolution.width, fps::gameConfig.resolution.height, "fps", FLAG_VSYNC_HINT);
 	raylib::RenderTexture playerScreen(fps::gameConfig.resolution.width, fps::gameConfig.resolution.height);
 	raylib::RenderTexture editScreen(200, 100);
 	raylib::Rectangle     playerScreenRect(0.0f, 0.0f, (float)fps::gameConfig.resolution.width, (float)-fps::gameConfig.resolution.height);
 	raylib::Rectangle     editScreenRect(0, 0, 200.0f, -100.0f);
 
+	SetWindowMonitor(0);
 	DisableCursor();
 
 	while (!window.ShouldClose()) {
