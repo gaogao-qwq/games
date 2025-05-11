@@ -8,7 +8,13 @@ using namespace fps::game_input;
 void update() {
 	startupTime += GetFrameTime();
 	handle_raw_input();
-	update_player();
+	if (IsKeyPressed(KEY_LEFT_ALT) && IsCursorHidden()) {
+		EnableCursor();
+	}
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && IsCursorOnScreen()) {
+		DisableCursor();
+	}
+	player.update();
 }
 
 void handle_raw_input() {
@@ -16,13 +22,5 @@ void handle_raw_input() {
 		if (IsKeyUp(key)) continue;
 		inputQueue.emplace_back(inputType, startupTime);
 	}
-}
-
-void update_player() {
-	while (!inputQueue.empty()) {
-		auto type = inputQueue.front().type;
-		inputQueue.pop_front();
-	}
-	player.update();
 }
 }  // namespace fps
